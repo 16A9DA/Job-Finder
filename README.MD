@@ -17,5 +17,5 @@ The tool is particularly useful for processing resumes/CVs, automatically extrac
 - Handles various PDF formats and encodings
 
 ## Requirements
-'''bash
+```bash
 pip install -r requirement.txt
