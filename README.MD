@@ -22,7 +22,7 @@ find jobs for the user using Machine Learning, user will be represent with avail
 - Handles various PDF formats and encodings
 
 
-````mermaid
+```mermaid
 flowchart TD
     A["Upload PDF"] --> B["UploadFile (bytes in FastAPI)"]
     B --> C["io.BytesIO (treat bytes as file)"]
