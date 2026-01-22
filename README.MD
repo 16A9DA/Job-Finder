@@ -24,11 +24,12 @@ find jobs for the user using Machine Learning, user will be represent with avail
 
 ```mermaid
 flowchart TD
-    A[Upload PDF] --> B[UploadFile (bytes in FastAPI)]
-    B --> C[io.BytesIO (treat bytes as file)]
-    C --> D[PdfReader / OCR (extract text)]
-    D --> E[Regex / pdf_to_json()]
-    E --> F[JSON → User Profile → ML Job Matching]
+    flowchart TD
+    A["Upload PDF"] --> B["UploadFile (bytes in FastAPI)"]
+    B --> C["io.BytesIO (treat bytes as file)"]
+    C --> D["PdfReader / OCR (extract text)"]
+    D --> E["Regex / pdf_to_json()"]
+    E --> F["JSON → User Profile → ML Job Matching"]
 
 ## Requirements
 ```bash
