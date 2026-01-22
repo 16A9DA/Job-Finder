@@ -6,7 +6,6 @@ from pdf2image import convert_from_bytes
 import pytesseract
 
 
-
 # in main function only file and functuon pdftojsson
 #  as the it has all the funciton inside
 def main():
@@ -51,7 +50,9 @@ def regex(text):
     # checks for pattern in a document which will be used later
     # list of jobs and countries as they can be determined
     result = {}  # the regex result that is a dict
-    result["name"] = [extract_name(text).title()]  # take first name, apply title (just incase)
+    result["name"] = [
+        extract_name(text).title()
+    ]  # take first name, apply title (just incase)
     jobs = [
         "Software Engineer",
         "Web Developer",
@@ -87,6 +88,9 @@ def regex(text):
         "Photographer",
         "Machine Learning Engineer",
         "Customer Service",
+        "Content Creator",
+        "Video Artist",
+        "Video Editor"
     ]
 
     countries = [
@@ -123,13 +127,28 @@ def regex(text):
         "Singapore",
         "Hungary",
     ]
+
+    education_degrees = [
+        "Bachelor",
+        "BS",
+        "BSc",
+        "BA",
+        "Master",
+        "MS",
+        "MSc",
+        "MBA",
+        "PhD",
+        "Doctorate",
+        "Associate",
+    ]
+
     patterns = {
         "email": r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b",
-        "phone_number": r"\+?\d[\d\s\-\((\)]{9,14}\d",
+        "phone_number": r"\+?\d[\d\s\-\((\)]{9,12}\d",
+        "country": r"\b(?:{})\b".format("|".join(countries)),
         "job": r"\b(?:{})\b".format("|".join(jobs)),
-        "country": r"\b(?:{})\b".format(
-            "|".join(countries)
-        ),  # pattern of the the info need
+        "education": r"\b(?:{})\b".format("|".join(education_degrees))
+        # pattern of the the info need
     }
     # loops through pattern key and items
     for key, pattern in patterns.items():
@@ -140,7 +159,7 @@ def regex(text):
 
 
 def pdf_to_json(
-    pdf
+    pdf,
 ):  # conversion, takes pdf file and outputs json file uses regex function
     text = extracted_pdf(pdf)
     data = regex(text)

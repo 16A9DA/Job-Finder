@@ -17,7 +17,7 @@ find jobs for the user using Machine Learning, user will be represent with avail
 ## Features
 - Extracts text from both text-based and image-based PDFs upload by user using FastApi
 - Uses OCR (Tesseract) for scanned documents
-- Extracts: Name, Email, Phone Number, Job Title, Country
+- Extracts: Name, Email, Phone Number,Country,Job Title,Education
 - Outputs structured JSON data that will be represented as profile
 - Handles various PDF formats and encodings
 
