@@ -1,6 +1,5 @@
-import shutil
 from project import pdf_to_json
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, UploadFile
 
 app = FastAPI()
 
