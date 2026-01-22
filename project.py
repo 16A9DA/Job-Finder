@@ -1,8 +1,11 @@
 import json
 import re
+import io
 from pypdf import PdfReader
-from pdf2image import convert_from_path
+from pdf2image import convert_from_bytes
 import pytesseract
+
+
 
 # in main function only file and functuon pdftojsson
 #  as the it has all the funciton inside
@@ -10,32 +13,37 @@ def main():
     pdf = "RayyanAhmedCv.pdf"  # name of pdf_file
     pdf_to_json(pdf)
 
-def extracted_pdf(pdf_path):  # function used to convert pdf to text
+
+def extracted_pdf(pdf):  # function used to convert pdf to text
 
     extracted_text = ""
     try:
 
-            reader = PdfReader(pdf_path)  # reads the pfs if in text form
-            for pages in reader.pages:
-                extracted_text += (
-                    pages.extract_text() or ""
-                )  # loops through every page and extracts text if no text then empty string
+        reader = PdfReader(
+            io.BytesIO(pdf)
+        )  # treat bytes as a file as requirement of FastApi UploadFile type it in main from Fastapi
+        for pages in reader.pages:
+            extracted_text += (
+                pages.extract_text() or ""
+            )  # loops through every page and extracts text if no text then empty string
     except Exception as e:
-            print("No extraction", e)
+        print("No extraction", e)
 
     if not extracted_text.strip():  # if extract is empty in case pdf is image
-            images = convert_from_path(pdf_path)
-            for img in images:
-                extracted_text += pytesseract.image_to_string(
-                    img
-                )  # pytesseract.image_to_string is a function that reads img and converts to string
-  
+        images = convert_from_bytes(pdf)
+        for img in images:
+            extracted_text += pytesseract.image_to_string(
+                img
+            )  # pytesseract.image_to_string is a function that reads img and converts to string
+
     return extracted_text
 
 
 def extract_name(text):
     first_line = text.strip().split("\n")[0]  # get first line
-    name = " ".join(first_line.split()[:2]).lower()  # take first 2 words and lowercase
+    name = " ".join(
+        first_line.split()[:2]
+    ).title()  # take first 2 words and makes it in title
     return name
 
 
@@ -43,7 +51,7 @@ def regex(text):
     # checks for pattern in a document which will be used later
     # list of jobs and countries as they can be determined
     result = {}  # the regex result that is a dict
-    result["name"] = [extract_name(text)]  # take first name
+    result["name"] = [extract_name(text).title()]  # take first name, apply title (just incase)
     jobs = [
         "Software Engineer",
         "Web Developer",
@@ -113,7 +121,7 @@ def regex(text):
         "Thailand",
         "Malaysia",
         "Singapore",
-        "Hungary"
+        "Hungary",
     ]
     patterns = {
         "email": r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b",
@@ -132,21 +140,18 @@ def regex(text):
 
 
 def pdf_to_json(
-    pdf_path, json_path="output.json"
+    pdf
 ):  # conversion, takes pdf file and outputs json file uses regex function
-    text = extracted_pdf(pdf_path)
+    text = extracted_pdf(pdf)
     data = regex(text)
 
-    with open(json_path, "w", encoding="UTF-8") as output_file:
-        json.dump(
-            data, output_file, ensure_ascii=False, indent=2
-        )  # puts all data in json
+    # with open(output_file, "w", encoding="UTF-8") as output_file:
+    #     json.dump(
+    #         data, output_file, ensure_ascii=False, indent=2
+    #     )  # puts all data in json
 
-    print(f"Data saved to {json_path}")
+    # # print(f"Data saved to {json_path}")
     return data
-
-
-
 
 
 if __name__ == "__main__":
