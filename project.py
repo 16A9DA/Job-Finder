@@ -7,14 +7,13 @@ from pydantic import BaseModel
 from ollama import chat
 
 
-
 class Profile(BaseModel):  # Structure of information that will be output in main.py
     Name: str
     Email: str
     Phone_Number: str
     Location: str
     Job: list[str]
-    Education: list[str]
+    Education: str
     skills: list[str]
 
 
@@ -60,13 +59,14 @@ def ai_model(text):
     - Do NOT add explanations
     - Do NOT add markdown
     - Do NOT add extra text
+    - Text should be clean
 
     - Name
     - Email
     -Phone Number
     - Location
     - Job (from experience)
-    - Education (list)
+    - Education (Highest education type)
     - Skills (list)
     Resume text:
     {text} """
@@ -76,7 +76,7 @@ def ai_model(text):
         messages=[
             {"role": "user", "content": prompt}  # role and prompt given as content
         ],
-        format=Profile.model_json_schema(), #Generate json schema from the class / so Ai can follow
+        format=Profile.model_json_schema(),  # Generate json schema from the class / so Ai can follow
     )
     # as output will be ["name"]["info"] which would be in raw text/string form
     # jsonloads() used for converting strings into json
