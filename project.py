@@ -1,13 +1,25 @@
 import json
-import re
 import io
 from pypdf import PdfReader
 from pdf2image import convert_from_bytes
 import pytesseract
+from pydantic import BaseModel
+from ollama import chat
+
+
+
+class Profile(BaseModel):  # Structure of information that will be output in main.py
+    Name: str
+    Email: str
+    Phone_Number: str
+    Location: str
+    Job: list[str]
+    Education: list[str]
+    skills: list[str]
 
 
 # in main function only file and functuon pdftojsson
-#  as the it has all the funciton inside
+#  as the it has all the funciton inside // for initial testing
 def main():
     pdf = "RayyanAhmedCv.pdf"  # name of pdf_file
     pdf_to_json(pdf)
@@ -38,138 +50,46 @@ def extracted_pdf(pdf):  # function used to convert pdf to text
     return extracted_text
 
 
-def extract_name(text):
-    first_line = text.strip().split("\n")[0]  # get first line
-    name = " ".join(
-        first_line.split()[:2]
-    ).title()  # take first 2 words and makes it in title
-    return name
+def ai_model(text):
+    prompt = f"""
+    You are given resume text extracted from a PDF.
+    Extract the following fields strictly in JSON format:
+    You are an information extraction system.
+    You should not add any newline character
 
+    - Do NOT add explanations
+    - Do NOT add markdown
+    - Do NOT add extra text
 
-def regex(text):
-    # checks for pattern in a document which will be used later
-    # list of jobs and countries as they can be determined
-    result = {}  # the regex result that is a dict
-    result["name"] = [
-        extract_name(text).title()
-    ]  # take first name, apply title (just incase)
-    jobs = [
-        "Software Engineer",
-        "Web Developer",
-        "Data Analyst",
-        "Data Scientist",
-        "Project Manager",
-        "Product Manager",
-        "Business Analyst",
-        "Graphic Designer",
-        "UX Designer",
-        "UI Designer",
-        "Accountant",
-        "Consultant",
-        "Teacher",
-        "Professor",
-        "Researcher",
-        "Marketing Manager",
-        "Sales Manager",
-        "HR Manager",
-        "Financial Analyst",
-        "Civil Engineer",
-        "Mechanical Engineer",
-        "Electrical Engineer",
-        "Doctor",
-        "Nurse",
-        "Lawyer",
-        "Attorney",
-        "Architect",
-        "Chef",
-        "Pilot",
-        "Journalist",
-        "Writer",
-        "Photographer",
-        "Machine Learning Engineer",
-        "Customer Service",
-        "Content Creator",
-        "Video Artist",
-        "Video Editor"
-    ]
-
-    countries = [
-        "USA",
-        "United States",
-        "Canada",
-        "UK",
-        "United Kingdom",
-        "India",
-        "Pakistan",
-        "Germany",
-        "France",
-        "Australia",
-        "Brazil",
-        "China",
-        "Japan",
-        "Mexico",
-        "Russia",
-        "South Africa",
-        "Italy",
-        "Spain",
-        "Argentina",
-        "Egypt",
-        "Saudi Arabia",
-        "Turkey",
-        "Sweden",
-        "Norway",
-        "Netherlands",
-        "Belgium",
-        "Switzerland",
-        "New Zealand",
-        "Thailand",
-        "Malaysia",
-        "Singapore",
-        "Hungary",
-    ]
-
-    education_degrees = [
-        "Bachelor",
-        "BS",
-        "BSc",
-        "BA",
-        "Master",
-        "MS",
-        "MSc",
-        "MBA",
-        "PhD",
-        "Doctorate",
-        "Associate",
-    ]
-
-    patterns = {
-        "email": r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b",
-        "phone_number": r"\+?\d[\d\s\-\((\)]{9,12}\d",
-        "country": r"\b(?:{})\b".format("|".join(countries)),
-        "job": r"\b(?:{})\b".format("|".join(jobs)),
-        "education": r"\b(?:{})\b".format("|".join(education_degrees))
-        # pattern of the the info need
-    }
-    # loops through pattern key and items
-    for key, pattern in patterns.items():
-        matches = re.findall(pattern, text, flags=re.IGNORECASE)
-        matches = [m.lower() for m in matches]
-        result[key] = list(set(matches))
-    return result
+    - Name
+    - Email
+    -Phone Number
+    - Location
+    - Job (from experience)
+    - Education (list)
+    - Skills (list)
+    Resume text:
+    {text} """
+    # llama3 is the Ai model
+    response = chat(
+        model="llama3",
+        messages=[
+            {"role": "user", "content": prompt}  # role and prompt given as content
+        ],
+        format=Profile.model_json_schema(), #Generate json schema from the class / so Ai can follow
+    )
+    # as output will be ["name"]["info"] which would be in raw text/string form
+    # jsonloads() used for converting strings into json
+    raw = response["message"]["content"]  #
+    return json.loads(raw)
 
 
 def pdf_to_json(
     pdf,
-):  # conversion, takes pdf file and outputs json file uses regex function
+):  # conversion, takes pdf file and outputs json file using llama3 model
     text = extracted_pdf(pdf)
-    data = regex(text)
+    data = ai_model(text)
 
-    # with open(output_file, "w", encoding="UTF-8") as output_file:
-    #     json.dump(
-    #         data, output_file, ensure_ascii=False, indent=2
-    #     )  # puts all data in json
-
-    # # print(f"Data saved to {json_path}")
     return data
 
 
