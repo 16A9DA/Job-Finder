@@ -32,7 +32,7 @@ flowchart TD
 ```
 
 ## Requirements
-Install Python packages:
+
 ```bash
 pip install -r requirement.txt
 ```
