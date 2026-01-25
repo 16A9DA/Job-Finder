@@ -1,6 +1,8 @@
 from fastapi import FastAPI, UploadFile, HTTPException
 from project import pdf_to_json
+from mlmodel import predict_data, load_ml_model
 
+tfid, tfd_MLP, X_train_tfid, X_train, df = load_ml_model()
 
 app = FastAPI()
 
@@ -20,9 +22,13 @@ async def upload_file_output(file: UploadFile):  # UploadFile changes pdf to bin
     reader = await file.read()  # reads file
     try:
         result = pdf_to_json(reader)
+        predict = predict_data(
+            result["skills"], tfid, tfd_MLP, X_train_tfid, X_train, df
+        )  # take result and predict
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Error processing pdf: {e}"
         )  # incase of any exception raise 500 and exception namae
-
-    return result
+    # response with user profile and job
+    response = {"Profile": result, "Job": predict}
+    return response
