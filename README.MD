@@ -44,3 +44,6 @@ brew install ollama
 ollama pull llama3
 ```
 
+## License
+
+This project is for educational purposes.
